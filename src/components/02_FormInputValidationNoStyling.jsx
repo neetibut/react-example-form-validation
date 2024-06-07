@@ -63,7 +63,7 @@ export default function FormInputValidationNoStyling() {
     e.preventDefault();
     setHidePassword(!hidePassword);
   }
-
+  console.log(submittedData);
   return (
     <div className="bg-slate-500 min-h-screen">
       <h1>Registration Form</h1>

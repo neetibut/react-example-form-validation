@@ -12,7 +12,6 @@ export default function FormInputValidation() {
     const validateEmail = () => {
       if (email === "") {
         setEmailError("");
-
         return;
       }
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -33,7 +32,6 @@ export default function FormInputValidation() {
         setPasswordError("");
       }
     };
-
     validateEmail();
     validatePassword();
   }, [email, password]);
@@ -44,6 +42,7 @@ export default function FormInputValidation() {
       alert(
         `Form submitted successfully! Your email ${email} has been submitted.`
       );
+      console.log(email, password);
     } else if (emailError && passwordError) {
       alert("Please fix the email address and password errors in the form.");
     } else if (emailError) {
