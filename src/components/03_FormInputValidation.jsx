@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import logo from "../assets/logo_JSD7_NJMKL.png";
+import logo from "../assets/logo.png";
 
 export default function FormInputValidation() {
   const [email, setEmail] = useState("");
@@ -7,24 +7,27 @@ export default function FormInputValidation() {
   const [hidePassword, setHidePassword] = useState(true);
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
+  const [emailTouched, setEmailTouched] = useState(false);
+  const [passwordTouched, setPasswordTouched] = useState(false);
 
   useEffect(() => {
     const validateEmail = () => {
-      if (email === "") {
-        setEmailError("");
-        return;
-      }
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(email)) {
-        setEmailError("Invalid email address");
+      if (email === "" && emailTouched) {
+        setEmailError("Email is required");
       } else {
-        setEmailError("");
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (emailTouched && !emailRegex.test(email)) {
+          setEmailError("Invalid email address");
+        } else {
+          setEmailError("");
+        }
       }
     };
+
     const validatePassword = () => {
-      if (password === "") {
-        setPasswordError("");
-      } else if (password.length < 6) {
+      if (password === "" && passwordTouched) {
+        setPasswordError("Password is required");
+      } else if (passwordTouched && password.length < 6) {
         setPasswordError(
           "Invalid password, must be at least 6 characters long"
         );
@@ -32,25 +35,40 @@ export default function FormInputValidation() {
         setPasswordError("");
       }
     };
+
     validateEmail();
     validatePassword();
-  }, [email, password]);
+  }, [email, password, emailTouched, passwordTouched]);
 
   function handleSubmit(e) {
     e.preventDefault();
-    if (!emailError && !passwordError) {
+
+    // Check for empty fields
+    if (!email) {
+      setEmailError("Email is required");
+      setEmailTouched(true);
+    }
+    if (!password) {
+      setPasswordError("Password is required");
+      setPasswordTouched(true);
+    }
+
+    // Only submit if there are no errors and both fields are filled
+    if (!emailError && !passwordError && email && password) {
       alert(
         `Form submitted successfully! Your email ${email} has been submitted.`
       );
       console.log(email, password);
-    } else if (emailError && passwordError) {
-      alert("Please fix the email address and password errors in the form.");
-    } else if (emailError) {
-      alert("Please fix the email address error in the form.");
-    } else if (passwordError) {
-      alert("Please fix the password error in the form.");
+
+      // Clear the form after submission
+      setEmail("");
+      setPassword("");
+      setEmailError("");
+      setPasswordError("");
+      setEmailTouched(false);
+      setPasswordTouched(false);
     } else {
-      console.log("Unknown error, please refresh your browser");
+      alert("Please fill in all required fields and fix any errors.");
     }
   }
 
@@ -62,12 +80,13 @@ export default function FormInputValidation() {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-tl from-green-500 via-emerald-500 to-teal-500">
       <section className="flex justify-center items-center mb-4">
-        <img src={logo} alt="logo" className="w-[30%]" />
+        <img src={logo} alt="logo" className="w-[50%]" />
       </section>
       <h1 className="mb-4 text-4xl font-extrabold">Registration Form</h1>
       <form
         onSubmit={handleSubmit}
         className="bg-slate-300 p-6 rounded shadow-md w-full max-w-sm"
+        autoComplete="off"
       >
         <div className="mb-4">
           <label className="block text-gray-700 text-sm font-bold mb-2">
@@ -77,11 +96,13 @@ export default function FormInputValidation() {
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            onFocus={() => setEmailTouched(true)} // Set emailTouched to true on focus
+            autoComplete="chrome-off"
             className={`shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline ${
               emailError ? "border-red-500" : ""
             }`}
           />
-          {emailError && email !== "" && (
+          {emailError && emailTouched && (
             <p className="text-red-500 text-xs italic mt-2">{emailError}</p>
           )}
         </div>
@@ -93,6 +114,8 @@ export default function FormInputValidation() {
             type={hidePassword ? "password" : "text"}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            onFocus={() => setPasswordTouched(true)} // Set passwordTouched to true on focus
+            autoComplete="new-password"
             className={`shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline ${
               passwordError ? "border-red-500" : ""
             }`}
@@ -100,14 +123,12 @@ export default function FormInputValidation() {
           <div className="flex items-center mt-2">
             <button
               onClick={handleHidePassword}
-              className={`text-sm text-blue-500 hover:underline focus:outline-none ${
-                hidePassword ? "" : "hover:bg-emerald-500"
-              }`}
+              className="text-sm text-blue-500 hover:underline focus:outline-none"
             >
               {hidePassword ? "Show Password" : "Hide Password"}
             </button>
           </div>
-          {passwordError && password !== "" && (
+          {passwordError && passwordTouched && (
             <p className="text-red-500 text-xs italic mt-2">{passwordError}</p>
           )}
         </div>
@@ -120,7 +141,7 @@ export default function FormInputValidation() {
           </button>
         </div>
       </form>
-      <p className="m-4 ">Made with ❤️ by JSD7 👩🏻‍💻🧑🏻‍💻 🇹🇭 🌏</p>
+      <p className="m-4">Made with ❤️ by JSD8 👩🏻‍💻🧑🏻‍💻 🇹🇭 🌏</p>
     </div>
   );
 }

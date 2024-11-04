@@ -7,27 +7,30 @@ export default function FormInputValidationNoStyling() {
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [submittedData, setSubmittedData] = useState([]);
+  const [emailTouched, setEmailTouched] = useState(false);
+  const [passwordTouched, setPasswordTouched] = useState(false);
+
   // TODO: use useEffect hook to run functions to validate the input email and password
   // TODO: provide a button to show or hide the password
   // TODO: ensure the button is correctly set up in the the form element
   useEffect(() => {
     const validateEmail = () => {
-      if (email === "") {
-        setEmailError("");
-
-        return;
-      }
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(email)) {
-        setEmailError("Invalid email address");
+      if (email === "" && emailTouched) {
+        setEmailError("Email is required");
       } else {
-        setEmailError("");
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (emailTouched && !emailRegex.test(email)) {
+          setEmailError("Invalid email address");
+        } else {
+          setEmailError("");
+        }
       }
     };
+
     const validatePassword = () => {
-      if (password === "") {
-        setPasswordError("");
-      } else if (password.length < 6) {
+      if (password === "" && passwordTouched) {
+        setPasswordError("Password is required");
+      } else if (passwordTouched && password.length < 6) {
         setPasswordError(
           "Invalid password, must be at least 6 characters long"
         );
@@ -38,24 +41,38 @@ export default function FormInputValidationNoStyling() {
 
     validateEmail();
     validatePassword();
-  }, [email, password]);
+  }, [email, password, emailTouched, passwordTouched]);
 
   function handleSubmit(e) {
     e.preventDefault();
-    if (!emailError && !passwordError) {
+
+    // Check if email and password are not empty
+    if (!email) {
+      setEmailError("Email is required");
+      setEmailTouched(true);
+    }
+    if (!password) {
+      setPasswordError("Password is required");
+      setPasswordTouched(true);
+    }
+
+    // Only submit if there are no errors and fields are filled
+    if (!emailError && !passwordError && email && password) {
       const newEntry = { email, password };
       setSubmittedData([...submittedData, newEntry]);
       alert(
         `Form submitted successfully! Your email ${email} has been submitted.`
       );
-    } else if (emailError && passwordError) {
-      alert("Please fix the email address and password errors in the form.");
-    } else if (emailError) {
-      alert("Please fix the email address error in the form.");
-    } else if (passwordError) {
-      alert("Please fix the password error in the form.");
+
+      // Clear the form after submission
+      setEmail("");
+      setPassword("");
+      setEmailError("");
+      setPasswordError("");
+      setEmailTouched(false);
+      setPasswordTouched(false);
     } else {
-      console.log("Unknown error, please refresh your browser");
+      alert("Please fill in all required fields and fix any errors.");
     }
   }
 
@@ -63,19 +80,23 @@ export default function FormInputValidationNoStyling() {
     e.preventDefault();
     setHidePassword(!hidePassword);
   }
+
   console.log(submittedData);
+
   return (
     <div className="bg-slate-500 min-h-screen">
       <h1>Registration Form</h1>
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} autoComplete="off">
         <div>
           <label>Email:</label>
           <input
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            onFocus={() => setEmailTouched(true)} // Set emailTouched to true on focus
+            autoComplete="chrome-off"
           />
-          {emailError && email !== "" && <p>{emailError}</p>}
+          {emailError && emailTouched && <p>{emailError}</p>}
         </div>
         <div>
           <label>Password:</label>
@@ -83,13 +104,15 @@ export default function FormInputValidationNoStyling() {
             type={hidePassword ? "password" : "text"}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            onFocus={() => setPasswordTouched(true)} // Set passwordTouched to true on focus
+            autoComplete="new-password"
           />
           <div className="flex items-center mt-2">
             <button onClick={handleHidePassword}>
               {hidePassword ? "Show Password" : "Hide Password"}
             </button>
           </div>
-          {passwordError && password !== "" && <p>{passwordError}</p>}
+          {passwordError && passwordTouched && <p>{passwordError}</p>}
         </div>
         <div>
           <button type="submit">Submit</button>
